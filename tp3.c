@@ -136,34 +136,85 @@ int supprimerLivre(T_Rayon *rayon, char* titre)
     return 0;
 }
 
+//fonction de tri de tableau
+void trierTableau(char ***tab, int tailleTab)
+{
+    int changement,i;
+    
+    char *tmp;
+    
+    do
+    {
+        changement=0;
+        
+        for (i=0; i<tailleTab-1; i++)
+        {
+            if (strcmp(tab[i][1],tab[i+1][1])>0)
+            {
+                tmp=tab[i+1][1];
+                tab[i+1][1]=tab[i][1];
+                tab[i][1]=tmp;
+                changement=1;
+            }
+        }
+        
+    }while (changement==1);
+    
+    
+}
+
 //fonction de recherche de livres
 void rechercherLivres(T_Biblio *biblio, char* critereTitre)
 {
     T_Rayon *ptr_rayon = biblio->premier;
+    int nbLivres=0, i,j;
     
-    printf("%15s %15s %15s %15s %14s\n","Titre", "Auteur", "Edition", "Disponibilité", "Rayon");
+    char ***tableau;// création tableau des livres trouvés
+    tableau=malloc(sizeof(char**)*50);
+    
+    for (i=0; i<50; i++)
+    {
+        tableau[i]=malloc(sizeof(char*)*5);
+    }
     
     while (ptr_rayon)
     {
         T_Livre *ptr_livre = ptr_rayon->premier;
-        
         while (ptr_livre)
         {
+            i=0;
             if(strncmp(ptr_livre->titre, critereTitre, strlen(critereTitre))==0)
             {
-                printf("%15s %15s %15s", ptr_livre->titre, ptr_livre->auteur, ptr_livre->edition);
+                tableau[i][0]=ptr_livre->titre;
+                tableau[i][1]=ptr_livre->auteur;
+                tableau[i][2]=ptr_livre->edition;
                 
                 if(ptr_livre->disponible==1)
-                    printf("%15s", "Oui");
+                    tableau[i][3]="Oui";
                 else
-                    printf("%15s", "Non");
+                    tableau[i][3]="Non";
                 
-                printf("%15s\n", ptr_rayon->theme_rayon);
+                tableau[i][4]=ptr_rayon->theme_rayon;
+                nbLivres++;
             }
             ptr_livre=ptr_livre->suivant;
         }
         ptr_rayon=ptr_rayon->suivant;
     }
+    
+    trierTableau(tableau, nbLivres);//tri tableau
+    
+    printf("%15s %15s %15s %15s %14s\n","Titre", "Auteur", "Edition", "Disponibilité", "Rayon"); //Affichage tableau
+    
+    for(i=0;i<nbLivres;i++)
+    {
+        for (j=0; j<5; j++)
+        {
+            printf("%15s", tableau[i][j]);
+        }
+        printf("\n");
+    }
+
 }
 
 int main()
@@ -227,5 +278,3 @@ int main()
     
     return 0;
 }
-
-

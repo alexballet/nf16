@@ -45,5 +45,6 @@ int ajouterLivre(T_Rayon *rayon, T_Livre *livre);
 int emprunterLivre(T_Rayon *rayon, char* titre);
 int supprimerLivre(T_Rayon *rayon, char* titre);
 void rechercherLivres(T_Biblio *biblio, char* critereTitre);
+void trierTableau(char ***tab, int tailleTab);
 
 

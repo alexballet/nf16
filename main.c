@@ -17,15 +17,6 @@ int main()
      ***************************************************
      */
     
-    //    T_Biblio *UTC = creerBiblio("UTC");
-    //
-    //    T_Rayon *Maths = creerRayon("Maths");
-    //    T_Rayon *Biologie = creerRayon("Biologie");
-    //
-    //    T_Livre *Manuel_MT90 = creerLivre("Manuel MT90", "Prof", "2009");
-    //    T_Livre *Manuel_MT91 = creerLivre("Manuel MT91", "Prof", "2010");
-    //    T_Livre *Manuel_BL01 = creerLivre("Manuel BL01", "Prof2", "2013");
-    
     
     /*
      *************************************************************************************

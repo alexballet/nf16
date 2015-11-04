@@ -417,7 +417,7 @@ void rechercherLivres(T_Biblio *biblio, char* critereTitre)
     char ***tableau;// création tableau des livres trouvés
     tableau=malloc(sizeof(char**)*tailleTabLivres);
     
-    for (i=0; i<50; i++)
+    for (i=0; i<tailleTabLivres; i++)
     {
         tableau[i]=malloc(sizeof(char*)*5);
     }

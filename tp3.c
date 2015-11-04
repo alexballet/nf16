@@ -120,6 +120,7 @@ int ajouterLivre(T_Rayon *rayon, T_Livre *livre)
             livre->suivant=ptr_livre->suivant;
             ptr_livre->suivant=livre;
             ptr_livre=livre;
+            rayon->nombre_livres++;
         }
     }
     
@@ -192,14 +193,20 @@ int ajouterRayon(T_Biblio *biblio, T_Rayon *rayon)
 void afficherBiblio(T_Biblio *biblio)
 {
     //Creation d'un pointeur afin de manipuler la liste chainee
-    T_Rayon *ptr_nb_livres = biblio->premier;
+    T_Rayon *ptr_rayon = biblio->premier;
     
-    //On parcout la liste
-    //La liste étant déjà trié, on se contente d'afficher simplement dans l'odre ou on la parcourt
-    while (ptr_nb_livres)
+    if(!biblio->premier)
+        printf("Il n'y a pas de rayons dans la bibliothèque\n");
+    else
     {
-        printf("Le Rayon : %s contient %d livres\n",ptr_nb_livres->theme_rayon,ptr_nb_livres->nombre_livres);
-        ptr_nb_livres=ptr_nb_livres->suivant;
+        printf("%15s %20s\n","NOM", "Nombre de livres");
+        //On parcout la liste
+        //La liste étant déjà trié, on se contente d'afficher simplement dans l'odre ou on la parcourt
+        while (ptr_rayon)
+        {
+            printf("%15s %20d\n",ptr_rayon->theme_rayon,ptr_rayon->nombre_livres);
+            ptr_rayon=ptr_rayon->suivant;
+        }
     }
 }
 
@@ -208,24 +215,30 @@ void afficherBiblio(T_Biblio *biblio)
 void afficherRayon(T_Rayon *rayon)
 {
     //Pointeur sur la structure des livres. Récupère la première adresse de la sous liste chainée
-    T_Livre *ptr_rayon = rayon->premier;
+    T_Livre *ptr_livre = rayon->premier;
     
-    while(ptr_rayon->suivant)
+    if(rayon->nombre_livres==0)
+        printf("Il n'y a pas de livres dans le rayon\n");
+    else
     {
-        //Si livre Disponible
-        if (ptr_rayon->disponible==1)
-        {
-            printf("Titre : %s\tAuteur : %s\tEdition : %s\tDisponibilité : Oui\n",ptr_rayon->titre,ptr_rayon->auteur,ptr_rayon->edition);
-        }
-        //Si livre non Disponible
-        else
-        {
-            printf("Titre : %s\tAuteur : %s\tEdition : %s\tDisponibilité : Non\n",ptr_rayon->titre,ptr_rayon->auteur,ptr_rayon->edition);
-        }
-        //incrémentation du pointeur
-        ptr_rayon=ptr_rayon->suivant;
-    }
+        printf("%15s %15s %15s %15s\n","Titre", "Auteur", "Edition", "Disponibilité");
     
+        while(ptr_livre)
+        {
+            //Si livre Disponible
+            if (ptr_livre->disponible==1)
+            {
+                printf("%15s %15s %15s %14s\n",ptr_livre->titre,ptr_livre->auteur,ptr_livre->edition, "OUI");
+            }
+            //Si livre non Disponible
+            else
+            {
+                printf("%15s %15s %15s %14s\n",ptr_livre->titre,ptr_livre->auteur,ptr_livre->edition, "NON");
+            }
+            //incrémentation du pointeur
+            ptr_livre=ptr_livre->suivant;
+        }
+    }
 }
 
 
@@ -285,6 +298,7 @@ int supprimerLivre(T_Rayon *rayon, char* titre)
         ptr->suivant=NULL;
         free(ptr);
         printf("Vous venez de supprimer le livre %s\n", titre);
+        rayon->nombre_livres--;
         return 1;
     }
     
@@ -301,6 +315,7 @@ int supprimerLivre(T_Rayon *rayon, char* titre)
             ptr->suivant=ptr->suivant->suivant;
             free(ptr2->suivant);
             printf("Vous venez de supprimer le livre %s\n", titre);
+            rayon->nombre_livres--;
             return 1;
         }
     }
@@ -312,9 +327,36 @@ int supprimerLivre(T_Rayon *rayon, char* titre)
  Suppression d'un rayon et de tous les livres qu'il contient
  renvoie 1 si la suppression s'est bien passée, 0 sinon; on veillera à libérer la mémoire précédemment allouée
  */
-void supprimerRayon(T_Biblio *biblio, char *nom_rayon)
+void supprimerRayon(T_Biblio *biblio, char *nomRayon)
 {
+    T_Rayon *ptr_rayon = biblio->premier;
     
+    while (ptr_rayon->suivant && strcmp(ptr_rayon->suivant->theme_rayon,nomRayon)!=0)//recherche du rayon
+        ptr_rayon = ptr_rayon->suivant;
+    
+    if((biblio->premier->suivant && !ptr_rayon->suivant) || (!biblio->premier->suivant && strcmp(ptr_rayon->theme_rayon,nomRayon)!=0))
+        printf("Le rayon est inexistant.\n");
+    else
+    {
+        T_Livre *ptr_livre = ptr_rayon->premier;
+        
+        while (ptr_livre)
+        {
+            T_Livre *ptr_livre_free = ptr_livre;
+            ptr_livre=ptr_livre->suivant;
+            free(ptr_livre_free);
+        }
+        
+        T_Rayon *ptr_rayon_free = ptr_rayon->suivant;
+        if(ptr_rayon->suivant)
+            ptr_rayon->suivant=ptr_rayon->suivant->suivant;
+        else
+            biblio->premier=NULL;
+        
+        free(ptr_rayon_free);
+        
+        printf("le rayon %s a été supprimé\n", nomRayon);
+    }
 }
 
 
@@ -349,7 +391,7 @@ void trierTableau(char ***tab, int tailleTab)
     {
         changement=0;
         
-        for (i=0; i<tailleTab-1; i++)
+        for (i=0; i<tailleTab-2; i++)
         {
             if (strcmp(tab[i][1],tab[i+1][1])>0)
             {
@@ -383,9 +425,9 @@ void rechercherLivres(T_Biblio *biblio, char* critereTitre)
     while (ptr_rayon)
     {
         T_Livre *ptr_livre = ptr_rayon->premier;
+        i=0;
         while (ptr_livre)
         {
-            i=0;
             if(strncmp(ptr_livre->titre, critereTitre, strlen(critereTitre))==0)
             {
                 tableau[i][0]=ptr_livre->titre;
@@ -399,6 +441,7 @@ void rechercherLivres(T_Biblio *biblio, char* critereTitre)
                 
                 tableau[i][4]=ptr_rayon->theme_rayon;
                 nbLivres++;
+                i++;
             }
             ptr_livre=ptr_livre->suivant;
         }

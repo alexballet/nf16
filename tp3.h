@@ -50,6 +50,8 @@ int supprimerLivre(T_Rayon *rayon, char* titre);
 void supprimerRayon(T_Biblio *biblio, char *nom_rayon);
 void trierTableau(char ***tab, int tailleTab);
 void rechercherLivres(T_Biblio *biblio, char* critereTitre);
+void traiterListeEmprunts(T_Biblio *biblio);
+
 
 #endif
 

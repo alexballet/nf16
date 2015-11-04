@@ -468,3 +468,48 @@ void rechercherLivres(T_Biblio *biblio, char* critereTitre)
  FIN DES FONCTIONS COMPLÉMENTAIRES
  *********************************
  */
+
+
+/*
+ **************
+ FONCTION BONUS
+ **************
+ */
+void traiterListeEmprunts(T_Biblio *biblio)
+{
+    int n, i;
+    char titre[tailleNom], nomRayon[tailleNom];
+
+    printf("Combien de livres voulez-vous emprunter ?");
+    scanf("%d", &n);
+    getchar();
+    
+    for (i=0; i<n; i++)
+    {
+        printf("Livre %d :\n", i+1);
+        printf("Titre : ");
+        scanf("%[^\n]s", titre);
+        getchar();
+        printf("\nRayon : ");
+        scanf("%[^\n]s", nomRayon);
+        getchar();
+        
+        T_Rayon *ptr_rayon = biblio->premier;
+            
+            while (ptr_rayon->suivant && strcmp(ptr_rayon->suivant->theme_rayon,nomRayon)!=0)//recherche du rayon
+                ptr_rayon = ptr_rayon->suivant;
+            
+            if((biblio->premier->suivant && !ptr_rayon->suivant) || (!biblio->premier->suivant && strcmp(ptr_rayon->theme_rayon,nomRayon)!=0))
+                printf("Le rayon %s est inexistant.\n", nomRayon);
+            else
+            {
+                emprunterLivre(ptr_rayon, titre);
+            }
+    }
+    
+    }
+/*
+ **************
+ FONCTION BONUS
+ **************
+ */

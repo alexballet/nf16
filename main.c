@@ -42,7 +42,7 @@ int main()
     
     while (continuer==1)
     {
-        printf("Bienvenue dans notre programme de gestion de bibliothèque. Que voulez-vous faire ?\n1.Créer une bibliothèque\n2.Ajouter un rayon à la bibliothèque\n3.Ajouter un livre dans un rayon\n4.Afficher les rayons de la bibliothèque\n5.Afficher les livres d'un rayon\n6.Retirer un livre\n7.Supprimer un rayon\n8.Rechercher un livre par son titre\n9.Supprimer un livre\n10.Quitter\n");
+        printf("Bienvenue dans notre programme de gestion de bibliothèque. Que voulez-vous faire ?\n1.Créer une bibliothèque\n2.Ajouter un rayon à la bibliothèque\n3.Ajouter un livre dans un rayon\n4.Afficher les rayons de la bibliothèque\n5.Afficher les livres d'un rayon\n6.Retirer un livre\n7.Supprimer un rayon\n8.Rechercher un livre par son titre\n9.Supprimer un livre\n10.Gérer une liste d'emprunts\n11.Quitter\n");
         scanf("%d", &choix);
         getchar();
         
@@ -217,8 +217,15 @@ int main()
                 else
                     printf("Créer la bibliothèque d'abord !\n");
                 break;
-
             case 10:
+                if (bibliothèque==1)
+                {
+                    traiterListeEmprunts(biblio);
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
+            case 11:
                 continuer=0;
                 break;
             default:

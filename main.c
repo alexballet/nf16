@@ -42,9 +42,13 @@ int main()
     
     while (continuer==1)
     {
-        printf("Bienvenue dans notre programme de gestion de bibliothèque. Que voulez-vous faire ?\n1.Créer une bibliothèque\n2.Ajouter un rayon à la bibliothèque\n3.Ajouter un livre dans un rayon\n4.Afficher les rayons de la bibliothèque\n5.Afficher les livres d'un rayon\n6.Retirer un livre\n7.Supprimer un rayon\n8.Rechercher un livre par son titre\n9.Quitter\n");
+        printf("Bienvenue dans notre programme de gestion de bibliothèque. Que voulez-vous faire ?\n1.Créer une bibliothèque\n2.Ajouter un rayon à la bibliothèque\n3.Ajouter un livre dans un rayon\n4.Afficher les rayons de la bibliothèque\n5.Afficher les livres d'un rayon\n6.Retirer un livre\n7.Supprimer un rayon\n8.Rechercher un livre par son titre\n9.Supprimer un livre\n10.Quitter\n");
         scanf("%d", &choix);
         getchar();
+        
+        if(bibliothèque==1)
+            rayon=biblio->premier;
+        
         switch (choix)
         {
             case 1:
@@ -122,7 +126,99 @@ int main()
                 else
                     printf("Créer la bibliothèque d'abord !\n");
                 break;
+            case 5:
+                if (bibliothèque==1)
+                {
+                    printf("Entrer le thème du rayon : ");
+                    scanf("%[^\n]s", nomRayon);
+                    getchar();
+                    while (rayon && strcmp(rayon->theme_rayon,nomRayon)!=0)//recherche du rayon
+                        rayon = rayon->suivant;
+                    
+                    if(!rayon)
+                        printf("Le rayon est inexistant.\n");
+                    else
+                    {
+                        afficherRayon(rayon);
+                    }
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
+            case 6:
+                if (bibliothèque==1)
+                {
+                    printf("Entrer le titre du livre : ");
+                    scanf("%[^\n]s", titre);
+                    getchar();
+                    
+                    printf("Entrer le thème du rayon : ");
+                    scanf("%[^\n]s", nomRayon);
+                    getchar();
+                    
+                    while (rayon && strcmp(rayon->theme_rayon,nomRayon)!=0)//recherche du rayon
+                        rayon = rayon->suivant;
+                    
+                    if(!rayon)
+                        printf("Le rayon est inexistant.\n");
+                    else
+                    {
+                        emprunterLivre(rayon, titre);
+                    }
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
+            case 7:
+                if (bibliothèque==1)
+                {
+                    printf("Entrer le thème du rayon : ");
+                    scanf("%[^\n]s", nomRayon);
+                    getchar();
+                    
+                    supprimerRayon(biblio, nomRayon);
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
+            case 8:
+                if (bibliothèque==1)
+                {
+                    printf("Entrer la chaine de caractères à rechercher : ");
+                    scanf("%[^\n]s", nom);
+                    getchar();
+                    
+                    rechercherLivres(biblio, nom);
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
             case 9:
+                if (bibliothèque==1)
+                {
+                    printf("Entrer le titre du livre : ");
+                    scanf("%[^\n]s", titre);
+                    getchar();
+                    
+                    printf("Entrer le thème du rayon : ");
+                    scanf("%[^\n]s", nomRayon);
+                    getchar();
+                    
+                    while (rayon && strcmp(rayon->theme_rayon,nomRayon)!=0)//recherche du rayon
+                        rayon = rayon->suivant;
+                    
+                    if(!rayon)
+                        printf("Le rayon est inexistant.\n");
+                    else
+                    {
+                        supprimerLivre(rayon, titre);
+                    }
+                }
+                else
+                    printf("Créer la bibliothèque d'abord !\n");
+                break;
+
+            case 10:
                 continuer=0;
                 break;
             default:

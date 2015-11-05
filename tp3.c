@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <ctype.h>
 #include "tp3.h"
 
 /*
@@ -103,9 +103,9 @@ int ajouterLivre(T_Rayon *rayon, T_Livre *livre)
 {
     T_Livre *ptr_livre = rayon->premier;
     
-    if(rayon->nombre_livres==0)
+    if(rayon->nombre_livres==0 || strcmp(livre->titre,ptr_livre->titre)<0)
     {
-        livre->suivant=NULL;
+        livre->suivant=rayon->premier;
         rayon->premier=livre;
         rayon->nombre_livres++;
         ptr_livre=rayon->premier;
@@ -140,10 +140,10 @@ int ajouterRayon(T_Biblio *biblio, T_Rayon *rayon)
 {
     T_Rayon *ptr_rayon = biblio->premier;
     
-    if(!biblio->premier)
+    if(!biblio->premier || strcmp(rayon->theme_rayon,biblio->premier->theme_rayon)<0)
     {
+        rayon->suivant=biblio->premier;
         biblio->premier=rayon;
-        rayon->suivant=NULL;
         ptr_rayon=rayon;
     }
     else
@@ -222,7 +222,7 @@ void afficherRayon(T_Rayon *rayon)
     else
     {
         printf("%15s %15s %15s %15s\n","Titre", "Auteur", "Edition", "Disponibilité");
-    
+        
         while(ptr_livre)
         {
             //Si livre Disponible
@@ -272,14 +272,17 @@ int emprunterLivre(T_Rayon *rayon, char* titre)
     while ((strcmp(ptr->titre,titre)!=0) && ptr->suivant)
         ptr=ptr->suivant;
     
-    if(ptr->disponible==1)
+    if(!ptr->suivant && (strcmp(ptr->titre,titre)!=0))
+    {
+        printf("Le livre %s n'exite pas dans le rayon %s\n", titre, rayon->theme_rayon);
+        return 0;
+    }
+    else if(ptr->disponible==1)
     {
         ptr->disponible=0;
         printf("Vous venez d'emprunter le livre %s\n", ptr->titre);
         return 1;
     }
-    else if(!ptr)
-        printf("Le livre n'exite pas dans ce rayon");
     else
         printf("Le livre %s est déjà emprunté\n", ptr->titre);
     return 0;
@@ -295,7 +298,6 @@ int supprimerLivre(T_Rayon *rayon, char* titre)
     if (strcmp(ptr->titre,titre)==0)
     {
         rayon->premier=ptr->suivant;
-        ptr->suivant=NULL;
         free(ptr);
         printf("Vous venez de supprimer le livre %s\n", titre);
         rayon->nombre_livres--;
@@ -331,12 +333,7 @@ void supprimerRayon(T_Biblio *biblio, char *nomRayon)
 {
     T_Rayon *ptr_rayon = biblio->premier;
     
-    while (ptr_rayon->suivant && strcmp(ptr_rayon->suivant->theme_rayon,nomRayon)!=0)//recherche du rayon
-        ptr_rayon = ptr_rayon->suivant;
-    
-    if((biblio->premier->suivant && !ptr_rayon->suivant) || (!biblio->premier->suivant && strcmp(ptr_rayon->theme_rayon,nomRayon)!=0))
-        printf("Le rayon est inexistant.\n");
-    else
+    if (strcmp(biblio->premier->theme_rayon,nomRayon)==0)
     {
         T_Livre *ptr_livre = ptr_rayon->premier;
         
@@ -346,16 +343,34 @@ void supprimerRayon(T_Biblio *biblio, char *nomRayon)
             ptr_livre=ptr_livre->suivant;
             free(ptr_livre_free);
         }
+
+        biblio->premier=ptr_rayon->suivant;
+        printf("Vous venez de supprimer le rayon %s\n", ptr_rayon->theme_rayon);
+        free(ptr_rayon);
+    }
+    else
+    {
+        while (ptr_rayon->suivant && (strcmp(ptr_rayon->suivant->theme_rayon,nomRayon)!=0))
+            ptr_rayon=ptr_rayon->suivant;
         
-        T_Rayon *ptr_rayon_free = ptr_rayon->suivant;
-        if(ptr_rayon->suivant)
-            ptr_rayon->suivant=ptr_rayon->suivant->suivant;
+        if(!ptr_rayon->suivant)
+            printf("Le rayon %s n'existe pas\n", nomRayon);
         else
-            biblio->premier=NULL;
-        
-        free(ptr_rayon_free);
-        
-        printf("le rayon %s a été supprimé\n", nomRayon);
+        {
+            T_Livre *ptr_livre = ptr_rayon->premier;
+            
+            while (ptr_livre)
+            {
+                T_Livre *ptr_livre_free = ptr_livre;
+                ptr_livre=ptr_livre->suivant;
+                free(ptr_livre_free);
+            }
+            
+            T_Rayon *ptr_rayon_free = ptr_rayon->suivant;
+            ptr_rayon->suivant=ptr_rayon->suivant->suivant;
+            printf("Vous venez de supprimer le rayon %s\n", ptr_rayon_free->theme_rayon);
+            free(ptr_rayon_free);
+        }
     }
 }
 
@@ -378,6 +393,19 @@ void supprimerRayon(T_Biblio *biblio, char *nomRayon)
  DEBUT DES FONCTIONS COMPLÉMENTAIRES
  ***********************************
  */
+
+//fonction de convertion des caractères en majuscule
+void convertion_Maj(char *mot)
+{
+    int i;
+    for (i=0; i<strlen(mot); i++)
+    {
+        mot[i]=toupper(mot[i]);
+    }
+}
+
+
+
 
 
 //fonction de tri de tableau
@@ -421,11 +449,10 @@ void rechercherLivres(T_Biblio *biblio, char* critereTitre)
     {
         tableau[i]=malloc(sizeof(char*)*5);
     }
-    
+    i=0;
     while (ptr_rayon)
     {
         T_Livre *ptr_livre = ptr_rayon->premier;
-        i=0;
         while (ptr_livre)
         {
             if(strncmp(ptr_livre->titre, critereTitre, strlen(critereTitre))==0)
@@ -479,7 +506,7 @@ void traiterListeEmprunts(T_Biblio *biblio)
 {
     int n, i;
     char titre[tailleNom], nomRayon[tailleNom];
-
+    
     printf("Combien de livres voulez-vous emprunter ?");
     scanf("%d", &n);
     getchar();
@@ -489,25 +516,36 @@ void traiterListeEmprunts(T_Biblio *biblio)
         printf("Livre %d :\n", i+1);
         printf("Titre : ");
         scanf("%[^\n]s", titre);
+        convertion_Maj(titre);
         getchar();
         printf("\nRayon : ");
         scanf("%[^\n]s", nomRayon);
+        convertion_Maj(nomRayon);
         getchar();
         
         T_Rayon *ptr_rayon = biblio->premier;
-            
+        
+        if(strcmp(biblio->premier->theme_rayon,nomRayon)!=0)
+        {
             while (ptr_rayon->suivant && strcmp(ptr_rayon->suivant->theme_rayon,nomRayon)!=0)//recherche du rayon
-                ptr_rayon = ptr_rayon->suivant;
-            
-            if((biblio->premier->suivant && !ptr_rayon->suivant) || (!biblio->premier->suivant && strcmp(ptr_rayon->theme_rayon,nomRayon)!=0))
-                printf("Le rayon %s est inexistant.\n", nomRayon);
-            else
             {
-                emprunterLivre(ptr_rayon, titre);
+                ptr_rayon = ptr_rayon->suivant;
             }
+        }
+        
+        if((biblio->premier->suivant && !ptr_rayon->suivant) || (!biblio->premier->suivant && strcmp(ptr_rayon->theme_rayon,nomRayon)!=0))
+            printf("Le rayon %s est inexistant.\n", nomRayon);
+        else if(strcmp(biblio->premier->suivant->theme_rayon,nomRayon)==0)
+        {
+            emprunterLivre(ptr_rayon->suivant, titre);
+        }
+        else
+        {
+            emprunterLivre(ptr_rayon, titre);
+        }
     }
     
-    }
+}
 /*
  **************
  FONCTION BONUS
